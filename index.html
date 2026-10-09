@@ -949,9 +949,10 @@ initPatient();render();
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js').then(r => { r.update().catch(() => {}); }).catch(() => {}); });
-  // 新版 service worker 接管時自動重新整理一次,確保畫面是最新版(避免重複:只在已有舊版控制時觸發)
+  // 只有「舊版正在控制、被新版取代」時才自動重新整理一次;第一次安裝不重整,避免打斷使用者
+  const hadController = !!navigator.serviceWorker.controller;
   let reloaded = false;
-  navigator.serviceWorker.addEventListener('controllerchange', () => { if (navigator.serviceWorker.controller && !reloaded) { reloaded = true; location.reload(); } });
+  navigator.serviceWorker.addEventListener('controllerchange', () => { if (hadController && !reloaded) { reloaded = true; location.reload(); } });
 }
 </script>
 </body>
