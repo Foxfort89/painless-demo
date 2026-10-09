@@ -224,6 +224,9 @@ input.date{padding-right:50px;
 .patient-hd{background:#5d5146;color:#fff;padding:14px;font-size:17px;font-weight:800}
 .patient-hd small{display:block;font-weight:400;font-size:12px;color:#d9cfc4;margin-top:4px}
 .chk{display:flex;align-items:center;gap:8px;padding:7px 2px;font-size:15px}
+.symgrid{display:grid;grid-template-columns:1fr 1fr;gap:0 10px;margin:4px 0 10px}
+.symgrid .chk{padding:6px 0;font-size:15px}
+.symgrid input[type=checkbox]{appearance:auto;-webkit-appearance:auto;width:22px;height:22px;flex:none;border:none;padding:0;margin:0;background:none;accent-color:var(--line)}
 .done-ic{font-size:44px;text-align:center}
 
 /* ===== toasts / fab ===== */
@@ -452,8 +455,8 @@ input.date{padding-right:50px;
       <div class="tip">💡 填寫提示:<br>1.【快速帶入】:選取下拉選單,自動帶入配方原文與預設容量;右側可改為實際給藥量(例 9)。<br>2.【院內簡寫】:對半 = Lidocaine(5+5)、不對半 = Ropivacaine(2+8)、三段 = Fentanyl+Ropi+NS(1+2+7);B = Bupivacaine、SA: = 脊麻、Cont: = 持續輸注。</div>
       <label>疼痛分數 (VAS): <span id="m-vasval">未評估</span></label>
       <div class="vasrow" id="m-vas"></div>
-      <label style="font-size:16px;margin-top:14px">其他紀錄(主訴 / 管路 / 生命徵象 / PCA,可不選)</label>
-      <select id="m-evt"><option value="">— 不記錄 —</option></select>
+      <label style="font-size:16px;margin-top:14px">其他不適(可複選,可不選)</label>
+      <div class="symgrid" id="m-sym"></div>
       <label>操作時間</label>
       <div class="daterow" style="margin-top:0">
         <div><input class="date" id="m-date" aria-label="日期"></div>
@@ -497,20 +500,7 @@ input.date{padding-right:50px;
         <div style="margin-bottom:14px"><label style="font-size:15px">2. 疼痛分數 <span style="color:#c0392b">*</span></label>
           <select id="pt-score" style="margin-top:6px"><option value="">請選擇</option></select></div>
         <div style="margin-bottom:6px"><label style="font-size:15px">3. 其他不適 (有明顯症狀才點選)</label>
-          <div class="chk"><input type="checkbox" id="s1" value="胸悶"><label for="s1" style="margin:0">胸悶</label></div>
-          <div class="chk"><input type="checkbox" id="s2" value="心悸"><label for="s2" style="margin:0">心悸</label></div>
-          <div class="chk"><input type="checkbox" id="s3" value="呼吸困難"><label for="s3" style="margin:0">呼吸困難</label></div>
-          <div class="chk"><input type="checkbox" id="s4" value="噁心想吐"><label for="s4" style="margin:0">噁心想吐</label></div>
-          <div class="chk"><input type="checkbox" id="s5" value="頭暈"><label for="s5" style="margin:0">頭暈</label></div>
-          <div class="chk"><input type="checkbox" id="s6" value="頭痛"><label for="s6" style="margin:0">頭痛</label></div>
-          <div class="chk"><input type="checkbox" id="s7" value="皮膚癢"><label for="s7" style="margin:0">皮膚癢</label></div>
-          <div class="chk"><input type="checkbox" id="s8" value="發抖發冷"><label for="s8" style="margin:0">發抖發冷</label></div>
-          <div class="chk"><input type="checkbox" id="s9" value="耳鳴"><label for="s9" style="margin:0">耳鳴</label></div>
-          <div class="chk"><input type="checkbox" id="s10" value="嘴巴周圍麻"><label for="s10" style="margin:0">嘴巴周圍麻</label></div>
-          <div class="chk"><input type="checkbox" id="s11" value="腳麻或沒力"><label for="s11" style="margin:0">腳麻或沒力</label></div>
-          <div class="chk"><input type="checkbox" id="s12" value="尿不出來"><label for="s12" style="margin:0">尿不出來</label></div>
-          <div class="chk"><input type="checkbox" id="s13" value="背痛"><label for="s13" style="margin:0">背痛</label></div>
-          <div class="chk"><input type="checkbox" id="s14" value="只有一邊有效"><label for="s14" style="margin:0">只有一邊有效</label></div>
+          <div id="pt-sym"></div>
         </div>
         <button class="btn" style="background:#4a5568;max-width:140px;font-size:16px;border-radius:6px;padding:9px" onclick="submitPatient()">Submit</button>
       </div>
@@ -572,6 +562,9 @@ const DICT=[
  {id:'PC002',cat:'P',tag:'B',text:'Ropivacaine PCA 配方 B'},
 ];
 const dictOf=id=>DICT.find(d=>d.id===id);
+/* 其他不適:產婦端與加藥表單共用的平鋪片語(不綁 D/C/E/V/P) */
+const SYMPTOMS=['胸悶','心悸','呼吸困難','噁心想吐','頭暈','頭痛','皮膚癢','發抖發冷','耳鳴','嘴巴周圍麻','腳麻或沒力','尿不出來','背痛','只有一邊有效'];
+function renderSymptoms(containerId,prefix){const el=$(containerId);if(!el)return;el.innerHTML=SYMPTOMS.map((t,i)=>`<div class="chk"><input type="checkbox" id="${prefix}${i+1}" value="${t}"><label for="${prefix}${i+1}" style="margin:0">${t}</label></div>`).join('')}
 const CAT_COLOR={D:'#4f8df5',C:'#ff5c57',E:'#ff9f43',V:'#b388ff',P:'#4cd97b'};      /* navy 圖表用 */
 const CAT_COLOR_UI={D:'#2E5BBA',C:'#D14343',E:'#E08533',V:'#7E57C2',P:'#2E9670'};   /* 白底 UI 用 */
 const CAT_NAME={D:'加藥 Drug',C:'主訴 Complaint',E:'管路 Epidural',V:'生命徵象 Vital',P:'PCA'};
@@ -869,14 +862,10 @@ function recipeEcho(){const tag=$('m-recipe').value,r=recipeOf(tag),echo=$('m-ec
   if(!tag){echo.textContent='--- 藥物配方(若不加藥請留白) ---';echo.classList.add('ph');$('m-recipe').classList.add('ph');$('m-vol').value=0;return}
   $('m-recipe').classList.remove('ph');echo.classList.remove('ph');
   echo.textContent=r?r.text:parseTag(tag);if(r)$('m-vol').value=r.total}
-function fillEvtSelect(){
-  const groups={C:'主訴 Complaint',E:'管路 Epidural',V:'生命徵象 Vital',P:'PCA'};
-  $('m-evt').innerHTML='<option value="">— 不記錄 —</option>'+Object.keys(groups).map(c=>
-    `<optgroup label="${groups[c]}">`+DICT.filter(d=>d.cat===c).map(d=>`<option value="${d.id}">[${d.tag}] ${d.text}</option>`).join('')+'</optgroup>').join('')}
 function openForm(bed){curBed=bed||P[0].bed;
   $('m-bed').innerHTML=P.map(p=>`<option${p.bed===curBed?' selected':''}>${p.bed}</option>`).join('');
   $('m-recipe').innerHTML='<option value="">--- 無加藥 (若不加藥請留白) ---</option>'+RECIPES.map(r=>`<option value="${r.tag}">(${r.tag}) ${r.text}</option>`).join('');
-  recipeEcho();fillEvtSelect();
+  recipeEcho();document.querySelectorAll('#m-sym input').forEach(b=>b.checked=false);
   formVas=null;buildVas('m-vas','m-vasval',null);$('m-vasval').textContent='未評估';
   const d=new Date();$('m-date').value=ymd(d);fillHM('m-hh','m-mm',d);
   formBedSync();go('scr-form')}
@@ -888,12 +877,12 @@ function buildVas(rowId,valId,sel){const row=$(rowId);row.innerHTML='';
     b.onclick=()=>{buildVas(rowId,valId,i);$(valId).textContent=i;formVas=i};
     row.appendChild(b)}}
 function submitFull(){const p=byBed(curBed);const tag=$('m-recipe').value,rc=recipeOf(tag);
-  const evId=$('m-evt').value;
-  if(!tag&&formVas==null&&!evId){toast('info','請至少選擇藥物、評估疼痛分數或其他紀錄其中一項');return}
+  const msym=[...document.querySelectorAll('#m-sym input:checked')].map(b=>b.value);
+  if(!tag&&formVas==null&&!msym.length){toast('info','請至少選擇藥物、評估疼痛分數或其他不適其中一項');return}
   let msg=[];
   if(tag){const vol=+$('m-vol').value||(rc?rc.total:0);p.evs.push({t:now(),type:'MED',cat:'D',tag,vol});msg.push(`加藥 ${tag} : ${vol} mL`)}
   if(formVas!=null){p.evs.push({t:now()-1000,type:'VAS',s:formVas});msg.push(`VAS ${formVas}`)}
-  if(evId){const d=dictOf(evId);p.evs.push({t:now()-500,type:'EVT',cat:d.cat,tag:d.tag,id:d.id});msg.push(`[${d.tag}] 紀錄`)}
+  if(msym.length){p.evs.push({t:now()-500,type:'EVT',cat:'C',tag:'C',text:'不適:'+msym.join('、')});msg.push(`不適 ${msym.length} 項`)}
   formVas=null;
   toast('ok',`✅ 已記錄 ${p.bed} ${msg.join('、')}(示範:實際版本以 order_id + 實際量寫回 HIS/SharePoint,10 秒內可復原)`);
   render();go('scr-dash')}
@@ -943,7 +932,7 @@ setInterval(()=>{const bar=$('syncbar');bar.classList.add('on');setTimeout(()=>b
     toast('info',`📝 HIS 同步紀錄:${p.bed} <b style="color:${CAT_COLOR_UI[d.cat]}">[${d.tag}]</b> ${d.text.length>18?d.text.slice(0,18)+'…':d.text}`,3000);
   }},45000);
 
-initPatient();render();
+renderSymptoms('pt-sym','s');renderSymptoms('m-sym','ms');initPatient();render();
 </script>
 
 <script>
