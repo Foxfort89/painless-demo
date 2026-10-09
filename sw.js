@@ -1,6 +1,6 @@
-// 減痛戰情室示範版 PWA 快取(版本 c25f87ea)
+// 減痛戰情室示範版 PWA 快取(版本 0c2d1808)
 // 策略:頁面與 manifest「先連網、失敗才用快取」(每次開啟都拿最新);圖示「先快取」。
-const CACHE = 'warroom-demo-c25f87ea';
+const CACHE = 'warroom-demo-0c2d1808';
 const FILES = ['./', './index.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', e => { e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim())); });

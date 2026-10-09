@@ -221,7 +221,9 @@ input.date{padding-right:50px;
 /* ===== patient (QR) form ===== */
 #scr-patient select{appearance:auto;-webkit-appearance:auto;background:#fff;border:1px solid #c0c6cc;border-radius:4px;height:40px;font-size:15px;padding:0 8px}
 #scr-patient input[type=checkbox]{width:18px;height:18px;flex:none}
-.patient-hd{background:#5d5146;color:#fff;padding:14px;font-size:17px;font-weight:800}
+.patient-hd{background:#5d5146;color:#fff;padding:12px 14px;font-size:17px;font-weight:800;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.pt-back{flex:none;background:#fff;color:#3f3a33;font-weight:800;font-size:13px;border-radius:8px;padding:9px 11px;box-shadow:0 1px 3px rgba(0,0,0,.35);line-height:1.2}
+.pt-back:active{transform:scale(.97)}
 .patient-hd small{display:block;font-weight:400;font-size:12px;color:#d9cfc4;margin-top:4px}
 .chk{display:flex;align-items:center;gap:8px;padding:7px 2px;font-size:15px}
 .symgrid{display:grid;grid-template-columns:1fr 1fr;gap:0 10px;margin:4px 0 10px}
@@ -492,7 +494,7 @@ input.date{padding-right:50px;
 <section class="screen" id="scr-patient">
   <div class="page" style="background:#e9e4dc;padding-top:14px">
     <div style="background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.18)" id="pt-form">
-      <div class="patient-hd" style="background:linear-gradient(120deg,#3f3a33,#6b6156)">減痛助理 -疼痛即時回饋-<small>我們很在意您的感受!</small></div>
+      <div class="patient-hd" style="background:linear-gradient(120deg,#3f3a33,#6b6156)"><div>減痛助理 -疼痛即時回饋-<small>我們很在意您的感受!</small></div><button class="pt-back" onclick="go('scr-dash')" aria-label="返回醫護端">⇄ 醫護端</button></div>
       <div style="padding:14px">
         <p style="font-size:12px;color:#6b7a88;margin:0 0 4px">當您提交此表單時,除非您自行提供,否則不會自動收集您的詳細數據,例如名稱和電子郵件位址。</p>
         <p style="font-size:12px;color:#c0392b;margin:0 0 12px">* 必答</p>
@@ -510,7 +512,7 @@ input.date{padding-right:50px;
       <p style="text-align:center;font-weight:700">已收到您的訊息! 我們會持續關注您的動態。<br>如急需協助請知會護理師,祝您順心。</p>
       <button class="backlink" style="color:#2b5da8" onclick="resetPatient()">提交其他回應</button>
     </div>
-    <button class="backlink" style="color:#dfe3e7" onclick="go('scr-dash')">⟵ 返回醫護端(示範切換)</button>
+    <button class="backlink" style="color:#2b5da8;border:1.5px solid #2b5da8;border-radius:8px;width:auto;margin:8px auto 18px;padding:9px 16px;text-decoration:none;font-weight:700;display:block" onclick="go('scr-dash')">⟵ 返回醫護端(示範切換)</button>
   </div>
 </section>
 
