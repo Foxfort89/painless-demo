@@ -138,15 +138,15 @@ input.date{padding-right:50px;
 .chart-sub{text-align:center;font-size:15px;color:#c3cfe0;line-height:1.45;font-weight:600}
 .legend{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;font-size:10px;color:#aebcd2;padding:2px 0 4px}
 .legend span::before{content:'';display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:3px;vertical-align:middle;background:var(--c)}
-.evbox{cursor:pointer}
-.evbox.sel rect{stroke:#fff;stroke-width:1.5}
-.evtip{position:absolute;left:8px;right:8px;bottom:6px;background:#fff;color:#20262b;border-radius:8px;padding:8px 26px 8px 10px;font-size:12px;line-height:1.5;box-shadow:0 4px 14px rgba(0,0,0,.35);display:none;z-index:3}
+.evbox{cursor:pointer;touch-action:none;-webkit-user-select:none;user-select:none}
+.evbox.sel rect:not(.hit){stroke:#fff;stroke-width:1.5}
+.evtip{position:absolute;left:8px;right:8px;bottom:6px;background:#fff;color:#20262b;border-radius:8px;padding:8px 10px;pointer-events:none;font-size:12px;line-height:1.5;box-shadow:0 4px 14px rgba(0,0,0,.35);display:none;z-index:3}
 .evtip.on{display:block}
 .evtip .h{display:flex;align-items:center;gap:6px;font-weight:800;margin-bottom:2px}
 .evtip .d{width:9px;height:9px;border-radius:50%;flex:none}
 .evtip .big{font-size:16px;font-weight:900;font-variant-numeric:tabular-nums}
 .evtip .t{color:#8b98a3;font-size:11px;font-weight:400}
-.evtip .x{position:absolute;right:4px;top:4px;background:none;color:#8b98a3;font-size:14px;padding:2px 6px}
+.evtip .x{display:none}
 .chartnav{background:var(--navy);display:flex;justify-content:space-around;padding:8px 0 16px}
 .chartnav button{background:none;color:#fff;font-size:16px;font-weight:800;display:flex;flex-direction:column;align-items:center;gap:4px}
 .chartnav svg{width:46px;height:46px;display:block}
@@ -710,7 +710,7 @@ function drawDetail(){
   const wEnd=now()+60*MIN+chartOffset*MIN, wStart=wEnd-240*MIN;
   const d1=new Date(wEnd);
   $('d-range').innerHTML=`${d1.getFullYear()}/${String(d1.getMonth()+1).padStart(2,'0')}/${String(d1.getDate()).padStart(2,'0')}<br>${hm(wStart)} ~ ${hm(wEnd)}`;
-  const svg=$('chart');const W=340,H=220,L=24,R=10,T=42,B=26;   /* T 留兩層事件方框 + 分數 10 標籤的空間 */
+  const svg=$('chart');const W=340,H=220,L=24,R=10,T=48,B=26;   /* T 留兩層事件方框 + 分數 10 標籤的空間 */
   const X=t=>L+(t-wStart)/(240*MIN)*(W-L-R), Y=s=>T+(10-s)/10*(H-T-B);
   let out='';
   for(let i=0;i<=10;i+=2){out+=`<text x="4" y="${Y(i)+3}" font-size="8" fill="#8fa2bd">${i}</text><line x1="${L}" x2="${W-R}" y1="${Y(i)}" y2="${Y(i)}" stroke="#2a3f63" stroke-width="${i?0.5:1}" stroke-dasharray="${i?'2 3':''}"/>`}
@@ -723,13 +723,13 @@ function drawDetail(){
   curEvts=evts;
   const lanes=[];let boxes='';
   evts.forEach((e,i)=>{
-    const x=X(e.t),col=CAT_COLOR[e.cat]||'#fff',label=String(e.tag),w=Math.max(16,label.length*5.6+6);
+    const x=X(e.t),col=CAT_COLOR[e.cat]||'#fff',label=String(e.tag),w=Math.max(32,label.length*7.6+10);
     let lane=lanes.findIndex(rx=>x-w/2-rx>3);
     if(lane<0){lane=lanes.length;lanes.push(x+w/2)}else lanes[lane]=x+w/2;
     if(lane>1)lane=1;
-    const by=2+lane*13;
-    out+=`<line x1="${x}" x2="${x}" y1="${by+11}" y2="${H-B}" stroke="${col}" stroke-width="1.2" stroke-dasharray="3 3" opacity=".85"/>`;
-    boxes+=`<g class="evbox" data-i="${i}" role="button" tabindex="0" aria-label="${CAT_NAME[e.cat]||e.cat} ${label} ${hm(e.t)}"><rect x="${(x-w/2).toFixed(1)}" y="${by}" width="${w.toFixed(1)}" height="11" rx="2" fill="${col}"/><text x="${x.toFixed(1)}" y="${by+8.5}" font-size="7.5" font-weight="bold" fill="#10213d" text-anchor="middle">${label}</text></g>`;
+    const by=2+lane*21;
+    out+=`<line x1="${x}" x2="${x}" y1="${by+18}" y2="${H-B}" stroke="${col}" stroke-width="1.2" stroke-dasharray="3 3" opacity=".85"/>`;
+    boxes+=`<g class="evbox" data-i="${i}" role="button" tabindex="0" aria-label="${CAT_NAME[e.cat]||e.cat} ${label} ${hm(e.t)}"><rect class="hit" x="${(x-Math.max(w/2,22)).toFixed(1)}" y="${by-2}" width="${Math.max(w,46).toFixed(1)}" height="22" fill="transparent"/><rect x="${(x-w/2).toFixed(1)}" y="${by}" width="${w.toFixed(1)}" height="18" rx="3" fill="${col}"/><text x="${x.toFixed(1)}" y="${by+12.8}" font-size="10" font-weight="bold" fill="#10213d" text-anchor="middle">${label}</text></g>`;
   });
   const vas=p.evs.filter(e=>e.type==='VAS'&&e.t>=wStart&&e.t<=wEnd).sort((a,b)=>a.t-b.t);
   if(vas.length){
@@ -764,9 +764,13 @@ function showTip(i){
   document.querySelectorAll('#chart .evbox').forEach(g=>g.classList.toggle('sel',+g.dataset.i===i));
 }
 function hideTip(){tipEvt=null;const t=$('evtip');if(t)t.classList.remove('on');document.querySelectorAll('#chart .evbox.sel').forEach(g=>g.classList.remove('sel'))}
-$('chart').addEventListener('click',ev=>{const g=ev.target.closest('.evbox');if(g)showTip(+g.dataset.i);else hideTip()});
-$('chart').addEventListener('mouseover',ev=>{const g=ev.target.closest('.evbox');if(g)showTip(+g.dataset.i)});
-$('chart').addEventListener('keydown',ev=>{if(ev.key==='Enter'||ev.key===' '){const g=ev.target.closest('.evbox');if(g){ev.preventDefault();showTip(+g.dataset.i)}}});
+/* 事件方框:手指按住顯示、放開即消失;滑鼠懸停顯示、移開消失;鍵盤 Enter 顯示、Esc 關閉 */
+const evIdx=ev=>{const g=ev.target&&ev.target.closest?ev.target.closest('.evbox'):null;return g?+g.dataset.i:-1};
+$('chart').addEventListener('pointerdown',ev=>{const i=evIdx(ev);if(i>=0){ev.preventDefault();showTip(i)}});
+$('chart').addEventListener('pointerover',ev=>{if(ev.pointerType==='mouse'){const i=evIdx(ev);if(i>=0)showTip(i)}});
+$('chart').addEventListener('pointerout',ev=>{if(ev.pointerType==='mouse'&&evIdx(ev)>=0&&!(ev.relatedTarget&&ev.relatedTarget.closest&&ev.relatedTarget.closest('.evbox')))hideTip()});
+['pointerup','pointercancel','pointerleave'].forEach(t=>$('chart').addEventListener(t,ev=>{if(ev.pointerType!=='mouse'||t==='pointerleave')hideTip()}));
+$('chart').addEventListener('keydown',ev=>{if(ev.key==='Enter'||ev.key===' '){const i=evIdx(ev);if(i>=0){ev.preventDefault();showTip(i)}}else if(ev.key==='Escape')hideTip()});
 
 /* ───────── 個人資訊 ───────── */
 function swTab(t){$('tab-ob').classList.toggle('on',t==='ob');$('tab-an').classList.toggle('on',t==='an');$('pane-ob').hidden=t!=='ob';$('pane-an').hidden=t!=='an';$('pane-derm').hidden=true}
