@@ -949,7 +949,12 @@ initPatient();render();
 </script>
 
 <script>
-if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js').catch(() => {}); }); }
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js').then(r => { r.update().catch(() => {}); }).catch(() => {}); });
+  // 新版 service worker 接管時自動重新整理一次,確保畫面是最新版(避免重複:只在已有舊版控制時觸發)
+  let reloaded = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => { if (navigator.serviceWorker.controller && !reloaded) { reloaded = true; location.reload(); } });
+}
 </script>
 </body>
 </html>
