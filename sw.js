@@ -1,5 +1,5 @@
-// 減痛戰情室示範版 PWA 快取(版本 4fc98e09)
-const CACHE = 'warroom-demo-4fc98e09';
+// 減痛戰情室示範版 PWA 快取(版本 d8e10960)
+const CACHE = 'warroom-demo-d8e10960';
 const FILES = ['./', './index.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', e => { e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim())); });
