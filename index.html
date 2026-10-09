@@ -497,11 +497,22 @@ input.date{padding-right:50px;
         <div style="margin-bottom:14px"><label style="font-size:15px">2. 疼痛分數 <span style="color:#c0392b">*</span></label>
           <select id="pt-score" style="margin-top:6px"><option value="">請選擇</option></select></div>
         <div style="margin-bottom:6px"><label style="font-size:15px">3. 其他不適 (有明顯症狀才點選)</label>
-          <div class="chk"><input type="checkbox" id="s1" value="胸悶"><label for="s1" style="margin:0">胸悶</label></div>
-          <div class="chk"><input type="checkbox" id="s2" value="心悸"><label for="s2" style="margin:0">心悸</label></div>
-          <div class="chk"><input type="checkbox" id="s3" value="噁心"><label for="s3" style="margin:0">噁心</label></div>
-          <div class="chk"><input type="checkbox" id="s4" value="皮膚癢"><label for="s4" style="margin:0">皮膚癢</label></div>
-          <div class="chk"><input type="checkbox" id="s5" value="耳鳴"><label for="s5" style="margin:0">耳鳴</label></div>
+          <div style="font-size:12.5px;color:#6b7a88;margin:6px 0 2px">常見不適,回報後醫護會留意:</div>
+          <div class="chk"><input type="checkbox" id="sc1" value="皮膚癢"><label for="sc1" style="margin:0">皮膚癢</label></div>
+          <div class="chk"><input type="checkbox" id="sc2" value="噁心、想吐"><label for="sc2" style="margin:0">噁心、想吐</label></div>
+          <div class="chk"><input type="checkbox" id="sc3" value="頭暈"><label for="sc3" style="margin:0">頭暈</label></div>
+          <div class="chk"><input type="checkbox" id="sc4" value="發抖、發冷"><label for="sc4" style="margin:0">發抖、發冷</label></div>
+          <div class="chk"><input type="checkbox" id="sc5" value="頭痛"><label for="sc5" style="margin:0">頭痛</label></div>
+          <div class="chk"><input type="checkbox" id="sc6" value="腳麻、腳沒力"><label for="sc6" style="margin:0">腳麻、腳沒力</label></div>
+          <div class="chk"><input type="checkbox" id="sc7" value="尿不出來"><label for="sc7" style="margin:0">尿不出來</label></div>
+          <div class="chk"><input type="checkbox" id="sc8" value="背部或打針處痠痛"><label for="sc8" style="margin:0">背部或打針處痠痛</label></div>
+          <div class="chk"><input type="checkbox" id="sc9" value="只有一邊有效,另一邊還痛"><label for="sc9" style="margin:0">只有一邊有效,另一邊還痛</label></div>
+          <div style="font-size:12.5px;color:#c0392b;font-weight:700;margin:12px 0 2px">以下症狀請同時按床邊呼叫鈴:</div>
+          <div class="chk"><input type="checkbox" id="su1" value="胸悶、呼吸困難" data-urgent="1"><label for="su1" style="margin:0">胸悶、呼吸困難</label></div>
+          <div class="chk"><input type="checkbox" id="su2" value="心悸" data-urgent="1"><label for="su2" style="margin:0">心悸</label></div>
+          <div class="chk"><input type="checkbox" id="su3" value="耳鳴、嘴巴周圍麻、嘴裡有金屬味" data-urgent="1"><label for="su3" style="margin:0">耳鳴、嘴巴周圍麻、嘴裡有金屬味</label></div>
+          <div class="chk"><input type="checkbox" id="su4" value="手臂麻或沒力、說話困難" data-urgent="1"><label for="su4" style="margin:0">手臂麻或沒力、說話困難</label></div>
+          <div class="chk"><input type="checkbox" id="su5" value="發燒、忽冷忽熱" data-urgent="1"><label for="su5" style="margin:0">發燒、忽冷忽熱</label></div>
         </div>
         <button class="btn" style="background:#4a5568;max-width:140px;font-size:16px;border-radius:6px;padding:9px" onclick="submitPatient()">Submit</button>
       </div>
@@ -908,13 +919,13 @@ function submitPatient(){
   const v=$('pt-score').value;
   if(v===''){toast('info','「疼痛分數」為必答題');return}
   const s=+v,p=byBed($('pt-bed').value);
-  const sym=['s1','s2','s3','s4','s5'].filter(id=>$(id).checked).map(id=>$(id).value);
+  const boxes=[...document.querySelectorAll('#scr-patient input[type=checkbox]')].filter(b=>b.checked);const sym=boxes.map(b=>b.value);const urgent=boxes.some(b=>b.dataset.urgent);
   p.evs.push({t:now(),type:'VAS',s,sym});
   if(sym.length)p.evs.push({t:now(),type:'EVT',cat:'C',tag:'C',text:'產婦自述:'+sym.join('、')});
   $('pt-form').hidden=true;$('pt-done').hidden=false;
   render();
   if(s>7&&pushOn)setTimeout(()=>toast('teams',`<div class="tt">Workflows · Teams 推播(模擬)</div>🚨 產婦疼痛持續警報<br>${p.bed} (${maskName(p.name)}) 疼痛分數:${s} 已持續超過 50 分鐘。`,6500),1300);
-  if(sym.length&&pushOn)setTimeout(()=>toast('teams',`<div class="tt">Workflows · Teams 推播(模擬)</div>⚠ ${p.bed} 回報不適症狀:${sym.join('、')}`,6000),2600);
+  if(sym.length&&(pushOn||urgent))setTimeout(()=>toast('teams',`<div class="tt">Workflows · Teams 推播(模擬${urgent?' · 🔴 危急,不可靜音':''})</div>${urgent?'🚨':'⚠'} ${p.bed} 回報不適症狀:${sym.join('、')}`,urgent?8000:6000),2600);
 }
 function resetPatient(){$('pt-score').value='';['s1','s2','s3','s4','s5'].forEach(id=>$(id).checked=false);$('pt-form').hidden=false;$('pt-done').hidden=true}
 
